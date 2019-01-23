@@ -11,7 +11,7 @@ namespace ml {
 		friend PopulationTable;
 
 	private:
-		std::vector <std::vector < float>> layers;
+		std::vector <std::vector <float>> layers;
 		std::vector <size_t> architecture;
 
 	public:

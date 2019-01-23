@@ -12,7 +12,7 @@ add_executable(NN_GPU main.cpp
 
         sources/learning.cpp
         sources/nn.cpp
-        sources/populationtable.cpp)
+        sources/populationtable.cpp headers/samplestable.hpp sources/samplestable.cpp)
 
 include_directories(headers)
 
