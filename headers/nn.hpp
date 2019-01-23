@@ -16,7 +16,6 @@ namespace ml {
 
 	public:
 		Nn (const std::vector <size_t> & _architecture);
-
 	};
 }
 
