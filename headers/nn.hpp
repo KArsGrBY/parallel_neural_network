@@ -3,17 +3,21 @@
 
 #include "vector"
 
-class PopulationTable;
+namespace ml {
 
-class Nn {
-private:
-	std::vector <float *> layers;
-	std::vector <size_t> architecture;
+	class PopulationTable;
 
-public:
-	Nn (const std::vector <size_t> & _architecture);
+	class Nn {
+		friend PopulationTable;
 
-	friend PopulationTable;
-};
+	private:
+		std::vector <float *> layers;
+		std::vector <size_t> architecture;
+
+	public:
+		Nn (const std::vector <size_t> & _architecture);
+
+	};
+}
 
 #endif //NN_GPU_NN_HPP

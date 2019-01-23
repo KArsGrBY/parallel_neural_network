@@ -7,7 +7,7 @@ inline float randomFromRange (float x, float y) {
 	return dis(gen);
 }
 
-Nn::Nn (const std::vector <size_t> & _architecture) {
+ml::Nn::Nn (const std::vector <size_t> & _architecture) {
 	architecture = _architecture;
 	layers = std::vector <float *>((int) architecture.size() - 1);
 	for (size_t layer = 0; layer + 1 < architecture.size(); ++layer) {
@@ -21,5 +21,4 @@ Nn::Nn (const std::vector <size_t> & _architecture) {
 			}
 		}
 	}
-
 }
