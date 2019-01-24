@@ -9,15 +9,15 @@ inline float randomFromRange (float x, float y) {
 
 ml::Nn::Nn (const std::vector <size_t> & _architecture) {
 	architecture = _architecture;
-	layers = std::vector <std::vector <float>>((int) architecture.size() - 1);
+	weights = std::vector <std::vector <float>>((int) architecture.size() - 1);
 	for (size_t layer = 0; layer + 1 < architecture.size(); ++layer) {
 		size_t input = architecture[layer], output = architecture[layer + 1];
-		layers[layer] = std::vector <float>(input * output);
+		weights[layer] = std::vector <float>(input * output);
 //		 		RANGE SETS HERE. 6.f for sigmoid function
 		float range = 6.f / input;
 		for (size_t neuronInput = 0; neuronInput < input; ++neuronInput) {
 			for (size_t neuronOutput = 0; neuronOutput < output; ++neuronOutput) {
-				layers[layer][neuronInput * output + neuronOutput] = randomFromRange(-range, range);
+				weights[layer][neuronInput * output + neuronOutput] = randomFromRange(-range, range);
 			}
 		}
 	}

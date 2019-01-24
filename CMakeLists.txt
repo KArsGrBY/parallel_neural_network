@@ -9,10 +9,13 @@ add_executable(NN_GPU main.cpp
         headers/ml.hpp
         headers/nn.hpp
         headers/populationtable.hpp
+        headers/task.hpp
+        headers/samplestable.hpp
 
         sources/learning.cpp
         sources/nn.cpp
-        sources/populationtable.cpp headers/samplestable.hpp sources/samplestable.cpp)
+        sources/populationtable.cpp
+        sources/samplestable.cpp)
 
 include_directories(headers)
 

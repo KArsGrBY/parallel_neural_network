@@ -1,6 +1,7 @@
 #ifndef NN_GPU_SAMPLESTABLE_HPP
 #define NN_GPU_SAMPLESTABLE_HPP
 
+#include "ml.hpp"
 #include "vector"
 
 namespace ml {

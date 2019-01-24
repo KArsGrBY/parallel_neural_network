@@ -7,6 +7,7 @@
 namespace ml {
 
 	class Learning {
+	private:
 
 	};
 }

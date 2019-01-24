@@ -1,13 +1,13 @@
 #ifndef NN_GPU_POPULATIONTABLE_HPP
 #define NN_GPU_POPULATIONTABLE_HPP
 
+#include "ml.hpp"
 #include "nn.hpp"
 #include "vector"
 
 namespace ml {
-
 	struct PopulationTable {
-		std::vector <std::vector <float>> layers;
+		std::vector <std::vector <float>> weights;
 		size_t bestPersonIndex;
 		const std::vector <size_t> * architecture;
 		std::vector <Nn> population;
