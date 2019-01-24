@@ -6,11 +6,22 @@
 #include "vector"
 
 namespace ml {
-
-
 	class Task {
 	private:
+		static cl::Program::Sources srcExeLayer;
+		static cl::Program::Sources srcActLayer;
+		static cl::Program::Sources srcUpdate;
+
 		cl::Device device;
+		cl::Context context;
+		cl::CommandQueue commandQueue;
+		cl::Program progExeLayer;
+		cl::Program progActLayer;
+		cl::Program progUpdate;
+		cl::Kernel kernelExeLayer;
+		cl::Kernel kernelActLayer;
+		cl::Kernel kernelUpdate;
+
 		std::vector <cl::Buffer> neurons;
 		std::vector <cl::Buffer> weights;
 		std::vector <cl::Buffer> bestPerson;
@@ -19,7 +30,7 @@ namespace ml {
 		size_t firstIndex, lastIndex;
 
 	public:
-		Task (size_t _firstIndex, size_t _lastIndex);
+		Task (cl::Device _device, size_t firstIdx, size_t lstIdx, PopulationTable * popTable, SamplesTable * sampTamle);
 	};
 }
 
