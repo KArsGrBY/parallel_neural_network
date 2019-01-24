@@ -7,7 +7,7 @@
 
 namespace ml {
 	class Nn {
-		friend PopulationTable;
+		friend class PopulationTable;
 
 	private:
 		std::vector <std::vector <float>> weights;

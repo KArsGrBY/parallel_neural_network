@@ -13,8 +13,6 @@ namespace ml {
 		std::vector <Nn> population;
 
 		PopulationTable (std::vector <size_t> * _architecture, const std::vector <Nn> & _population);
-
-		void addPersons (const std::vector <Nn> & _population);
 	};
 }
 

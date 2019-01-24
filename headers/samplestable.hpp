@@ -5,11 +5,14 @@
 #include "vector"
 
 namespace ml {
-	struct SamplesTable {
+	class SamplesTable {
+		friend class Task;
+	private:
 		std::vector <float> input;
 		std::vector <float> output;
 		size_t sizeIn, sizeOut, size;
 
+	public:
 		SamplesTable (size_t _sizeIn, size_t _sizeOut);
 
 		void addSample (const std::vector <float> & _input, const std::vector <float> & _output);

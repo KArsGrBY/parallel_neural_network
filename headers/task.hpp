@@ -8,9 +8,7 @@
 namespace ml {
 	class Task {
 	private:
-		static cl::Program::Sources srcExeLayer;
-		static cl::Program::Sources srcActLayer;
-		static cl::Program::Sources srcUpdate;
+		static cl::Program::Sources source;
 
 		cl::Device device;
 		cl::Context context;
