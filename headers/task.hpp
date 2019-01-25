@@ -29,14 +29,17 @@ namespace ml {
 		std::vector <cl::Buffer> neurons;
 		std::vector <cl::Buffer> weights;
 		std::vector <cl::Buffer> bestPerson;
+
+		const std::vector <size_t> *architecture;
 		cl::Buffer outputs;
-		size_t population;
+		size_t population, samples;
 		size_t firstIndex, lastIndex;
 
 	public:
 		Task (const cl::Device & _device, size_t _firstIndex, size_t _lastIndex, PopulationTable * popTable, SamplesTable * sampTamle);
-	};
 
+		void executeLayer (size_t layer);
+	};
 }
 
 #endif //NN_GPU_TASK_HPP

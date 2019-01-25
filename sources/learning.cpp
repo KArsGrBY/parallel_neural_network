@@ -38,3 +38,12 @@ ml::Learning::Learning (const std::vector <size_t> & _arcitecture, size_t _count
 		personIndex = endOfGroup;
 	}
 }
+
+void ml::Learning::iteration () {
+	for (size_t layer = 0; layer + 1 < architecture.size(); ++layer) {
+		for (auto & task : tasks) {
+			task.executeLayer(layer);
+		}
+		break; // for debug
+	}
+}

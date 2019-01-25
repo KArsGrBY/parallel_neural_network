@@ -4,8 +4,11 @@
 
 ml::Task::Task (const cl::Device & _device, size_t _firstIndex, size_t _lastIndex, ml::PopulationTable * popTable,
 				ml::SamplesTable * sampTamle) {
+	architecture = popTable->architecture;
+
 	firstIndex = _firstIndex, lastIndex = _lastIndex;
 	population = lastIndex - firstIndex;
+	samples = sampTamle->size;
 	device = _device;
 	std::vector <cl::Device> devices = {device};
 
@@ -67,4 +70,22 @@ ml::Task::Task (const cl::Device & _device, size_t _firstIndex, size_t _lastInde
 	progUpdate = cl::Program(context, srcUpdate);
 	progUpdate.build(devices);
 	kernelUpdate = cl::Kernel(progUpdate, "update");
+}
+
+#define inBlock		1
+#define outBlock	1
+
+void ml::Task::executeLayer (size_t layer) {
+	size_t sizeIn = (*architecture)[layer];
+	size_t sizeOut = (*architecture)[layer + 1];
+	kernelExeLayer.setArg(0, sizeIn);
+	kernelExeLayer.setArg(1, sizeOut);
+	kernelExeLayer.setArg(2, weights[layer]);
+	kernelExeLayer.setArg(3, (*architecture)[layer]);
+	kernelExeLayer.setArg(4, (*architecture)[layer + 1]);
+	kernelExeLayer.setArg(5, population);
+	kernelExeLayer.setArg(6, inBlock);
+	kernelExeLayer.setArg(7, outBlock);
+
+	commandQueue.enqueueNDRangeKernel(kernelExeLayer, cl::NullRange, cl::NDRange(population, samples, sizeIn * sizeOut / inBlock / outBlock), 128);
 }

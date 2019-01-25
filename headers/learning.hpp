@@ -20,6 +20,8 @@ namespace ml {
 	public:
 		Learning (const std::vector <size_t> & _arcitecture, size_t _countOfNetworks,
 				  const std::vector <std::pair <std::vector <float>, std::vector <float>>> & _samples);
+
+		void iteration ();
 	};
 }
 
