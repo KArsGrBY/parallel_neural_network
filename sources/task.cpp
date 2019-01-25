@@ -58,15 +58,16 @@ ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::P
 	progExeLayer.build(devices);
 	kernelExeLayer = cl::Kernel(progExeLayer, "execute");
 
-	/*
 	//init activation layer
-	progActLayer = cl::Program(context, source);
+	progActLayer = cl::Program(context, srcActLayer);
 	progActLayer.build(devices);
 	kernelActLayer = cl::Kernel(progActLayer, "activate");
 
 	//init update layer
-	progUpdate = cl::Program(context, source);
+	progUpdate = cl::Program(context, srcUpdate);
 	progUpdate.build(devices);
 	kernelUpdate = cl::Kernel(progUpdate, "update");
-	*/
+
+
+	kernelExeLayer.setArg(0, neurons[0]);
 }
