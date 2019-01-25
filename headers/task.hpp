@@ -4,11 +4,15 @@
 #include "ml.hpp"
 #include "CL/cl.hpp"
 #include "vector"
+#include "singlekernel.hpp"
 
 namespace ml {
 	class Task {
+		friend class Learning;
 	private:
-		static cl::Program::Sources source;
+		const cl::Program::Sources & srcExeLayer = SingletonKernel::getInstance().getExeLayerSource();
+		const cl::Program::Sources & srcActLayer = SingletonKernel::getInstance().getActLayerSource();
+		const cl::Program::Sources & srcUpdate = SingletonKernel::getInstance().getUpdateSource();
 
 		cl::Device device;
 		cl::Context context;
@@ -28,8 +32,12 @@ namespace ml {
 		size_t firstIndex, lastIndex;
 
 	public:
-		Task (cl::Device _device, size_t firstIdx, size_t lstIdx, PopulationTable * popTable, SamplesTable * sampTamle);
+		Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, PopulationTable * popTable, SamplesTable * sampTamle);
+
+	private:
+		static void loadKernels ();
 	};
+
 }
 
 #endif //NN_GPU_TASK_HPP

@@ -15,9 +15,10 @@ add_executable(NN_GPU main.cpp
         sources/learning.cpp
         sources/nn.cpp
         sources/populationtable.cpp
-        sources/samplestable.cpp sources/task.cpp)
+        sources/samplestable.cpp sources/task.cpp headers/singlekernel.hpp)
 
 include_directories(headers)
+include_directories(kernels)
 
 find_package(OpenCL REQUIRED)
 include_directories(${OpenCL_INCLUDE_DIRS})
