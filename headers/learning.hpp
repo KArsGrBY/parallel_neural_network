@@ -12,9 +12,10 @@ namespace ml {
 
 	class Learning {
 	private:
-		SamplesTable samplesTable;
-		PopulationTable populationTable;
 		std::vector <size_t> architecture;
+		PopulationTable populationTable;
+		SamplesTable samplesTable;
+		std::vector <Task> tasks;
 
 	public:
 		Learning (const std::vector <size_t> & _arcitecture, size_t _countOfNetworks,

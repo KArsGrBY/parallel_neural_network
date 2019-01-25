@@ -2,7 +2,7 @@
 #include "populationtable.hpp"
 #include "task.hpp"
 
-ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::PopulationTable * popTable,
+ml::Task::Task (const cl::Device & _device, size_t _firstIndex, size_t _lastIndex, ml::PopulationTable * popTable,
 				ml::SamplesTable * sampTamle) {
 	firstIndex = _firstIndex, lastIndex = _lastIndex;
 	population = lastIndex - firstIndex;

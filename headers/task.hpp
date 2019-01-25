@@ -5,6 +5,8 @@
 #include "CL/cl.hpp"
 #include "vector"
 #include "singlekernel.hpp"
+#include "populationtable.hpp"
+#include "samplestable.hpp"
 
 namespace ml {
 	class Task {
@@ -32,10 +34,7 @@ namespace ml {
 		size_t firstIndex, lastIndex;
 
 	public:
-		Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, PopulationTable * popTable, SamplesTable * sampTamle);
-
-	private:
-		static void loadKernels ();
+		Task (const cl::Device & _device, size_t _firstIndex, size_t _lastIndex, PopulationTable * popTable, SamplesTable * sampTamle);
 	};
 
 }

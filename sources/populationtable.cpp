@@ -1,4 +1,5 @@
 #include "populationtable.hpp"
+#include "iostream"
 
 ml::PopulationTable::PopulationTable (std::vector <size_t> * _architecture, const std::vector <Nn> & _population) {
 	architecture = _architecture;

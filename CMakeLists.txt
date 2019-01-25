@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
 project(NN_GPU)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -O3")
+set(CMAKE_CXX_STANDARD 17)
+set(GCC_ENABLE_WARNINGS "-O3 -Wall -Wno-unused-result")
+set(CMAKE_CXX_FLAGS ${GCC_ENABLE_WARNINGS})
 
 add_executable(NN_GPU main.cpp
 
