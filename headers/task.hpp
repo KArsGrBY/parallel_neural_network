@@ -12,9 +12,9 @@ namespace ml {
 	class Task {
 		friend class Learning;
 	private:
-		const cl::Program::Sources & srcExeLayer = SingletonKernel::getInstance().getExeLayerSource();
-		const cl::Program::Sources & srcActLayer = SingletonKernel::getInstance().getActLayerSource();
-		const cl::Program::Sources & srcUpdate = SingletonKernel::getInstance().getUpdateSource();
+		cl::Program::Sources srcExeLayer;
+		cl::Program::Sources srcActLayer;
+		cl::Program::Sources srcUpdate;
 
 		cl::Device device;
 		cl::Context context;
@@ -36,7 +36,7 @@ namespace ml {
 		size_t firstIndex, lastIndex;
 
 	public:
-		Task (const cl::Device & _device, size_t _firstIndex, size_t _lastIndex, PopulationTable * popTable, SamplesTable * sampTamle);
+		Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, PopulationTable * popTable, SamplesTable * sampTamle);
 
 		void executeLayer (size_t layer);
 	};

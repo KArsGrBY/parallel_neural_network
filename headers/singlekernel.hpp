@@ -15,22 +15,22 @@ namespace ml {
 			return instance;
 		}
 
-		const cl::Program::Sources & getExeLayerSource () {
-			return srcExeLayer;
+		const std::string & getExeLayerCode () {
+			return codeExeLayer;
 		}
 
-		const cl::Program::Sources & getActLayerSource () {
-			return srcActLayer;
+		const std::string & getActLayerCode () {
+			return codeActLayer;
 		}
 
-		const cl::Program::Sources & getUpdateSource () {
-			return srcUpdate;
+		const std::string & getUpdateCode () {
+			return codeUpdate;
 		}
 
 	private:
-		cl::Program::Sources srcExeLayer;
-		cl::Program::Sources srcActLayer;
-		cl::Program::Sources srcUpdate;
+		std::string codeExeLayer;
+		std::string codeActLayer;
+		std::string codeUpdate;
 
 		SingletonKernel () {
 			std::ifstream fin;
@@ -38,20 +38,17 @@ namespace ml {
 
 			//upload executive layer kernel
 			fin = std::ifstream("../kernels/executive_layer.cl");
-			sourceCode = std::string(std::istreambuf_iterator <char>(fin), (std::istreambuf_iterator <char>()));
-			srcExeLayer = cl::Program::Sources(1, std::make_pair(sourceCode.c_str(), sourceCode.size() + 1));
+			codeExeLayer = std::string(std::istreambuf_iterator <char>(fin), (std::istreambuf_iterator <char>()));
 			fin.close();
 
 			//upload activate layer kernel
 			fin = std::ifstream("../kernels/activate_layer.cl");
-			sourceCode = std::string(std::istreambuf_iterator <char>(fin), (std::istreambuf_iterator <char>()));
-			srcActLayer = cl::Program::Sources(1, std::make_pair(sourceCode.c_str(), sourceCode.size() + 1));
+			codeActLayer = std::string(std::istreambuf_iterator <char>(fin), (std::istreambuf_iterator <char>()));
 			fin.close();
 
 			//upload update kernel
 			fin = std::ifstream("../kernels/update.cl");
-			sourceCode = std::string(std::istreambuf_iterator <char>(fin), (std::istreambuf_iterator <char>()));
-			srcUpdate = cl::Program::Sources(1, std::make_pair(sourceCode.c_str(), sourceCode.size() + 1));
+			codeUpdate = std::string(std::istreambuf_iterator <char>(fin), (std::istreambuf_iterator <char>()));
 			fin.close();
 		}
 

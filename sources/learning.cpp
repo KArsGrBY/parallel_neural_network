@@ -21,7 +21,7 @@ ml::Learning::Learning (const std::vector <size_t> & _arcitecture, size_t _count
 	for (auto & platform : platforms) {
 
 		std::vector <cl::Device> curDevices;
-		platform.getDevices(CL_DEVICE_TYPE_GPU, &curDevices);
+		platform.getDevices(CL_DEVICE_TYPE_ALL, &curDevices);
 		std::copy(std::begin(curDevices), std::end(curDevices), std::back_inserter(devices));
 
 	}
@@ -36,6 +36,7 @@ ml::Learning::Learning (const std::vector <size_t> & _arcitecture, size_t _count
 		}
 		tasks.emplace_back(device, personIndex, endOfGroup, & populationTable, & samplesTable);
 		personIndex = endOfGroup;
+		break; // for debug
 	}
 }
 
