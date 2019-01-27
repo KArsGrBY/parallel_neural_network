@@ -36,7 +36,7 @@ namespace ml {
 		size_t firstIndex, lastIndex;
 
 	public:
-		Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, PopulationTable * popTable, SamplesTable * sampTamle);
+		Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, PopulationTable * popTable, SamplesTable * sampTable);
 
 		void executeLayer (size_t layer);
 	};

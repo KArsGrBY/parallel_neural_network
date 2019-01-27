@@ -7,12 +7,12 @@
 #include "iostream"
 
 ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::PopulationTable * popTable,
-				ml::SamplesTable * sampTamle) {
+				ml::SamplesTable * sampTable) {
 	architecture = popTable->architecture;
 
 	firstIndex = _firstIndex, lastIndex = _lastIndex;
 	population = lastIndex - firstIndex;
-	samples = sampTamle->size;
+	samples = sampTable->size;
 	device = _device;
 	std::vector <cl::Device> devices = {device};
 
@@ -27,19 +27,19 @@ ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::P
 
 	//push output of samples into buffer
 	outputs = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-						 sampTamle->output.size() * sizeof(float), sampTamle->output.data());
+						 sampTable->output.size() * sizeof(float), sampTable->output.data());
 
-	std::vector <float> buf(sampTamle->input.size() * population);
+	std::vector <float> buf(sampTable->input.size() * population);
 	for (size_t index = 0; index < population; ++index) {
-		std::copy(std::begin(sampTamle->input), std::end(sampTamle->input),
-				  buf.data() + index * sampTamle->input.size());
+		std::copy(std::begin(sampTable->input), std::end(sampTable->input),
+				  buf.data() + index * sampTable->input.size());
 	}
 	//push input of samples into buffer
 	neurons[0] = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, buf.size() * sizeof(float), buf.data());
 
 	//push layers into buffer
 	for (size_t layer = 1; layer < architecture.size(); ++layer) {
-		buf = std::vector <float>(sampTamle->size * architecture[layer] * population);
+		buf = std::vector <float>(samples * architecture[layer] * population);
 		neurons[layer] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf.size() * sizeof(float), buf.data());
 	}
 
@@ -92,9 +92,9 @@ void ml::Task::executeLayer (size_t layer) {
 	kernelExeLayer.setArg(0, neurons[layer]);
 	kernelExeLayer.setArg(1, neurons[layer + 1]);
 	kernelExeLayer.setArg(2, weights[layer]);
-	kernelExeLayer.setArg(3, (*architecture)[layer]);
-	kernelExeLayer.setArg(4, (*architecture)[layer + 1]);
-	kernelExeLayer.setArg(5, samples);
+	kernelExeLayer.setArg(3, (unsigned int) (*architecture)[layer]);
+	kernelExeLayer.setArg(4, (unsigned int) (*architecture)[layer + 1]);
+	kernelExeLayer.setArg(5, (unsigned int) samples);
 	kernelExeLayer.setArg(6, inBlock);
 	kernelExeLayer.setArg(7, outBlock);
 
