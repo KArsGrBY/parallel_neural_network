@@ -1,5 +1,5 @@
-//#pragma comment( lib, "opencl.lib" )
-//#define __CL_ENABLE_EXCEPTIONS
+#pragma comment( lib, "opencl.lib" )
+#define __CL_ENABLE_EXCEPTIONS
 
 #include "samplestable.hpp"
 #include "populationtable.hpp"
@@ -62,9 +62,13 @@ ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::P
 
 	//init executive layer
 
-	progExeLayer = cl::Program(context, srcExeLayer);
-	progExeLayer.build(devices);
-	kernelExeLayer = cl::Kernel(progExeLayer, "execute");
+	try {
+		progExeLayer = cl::Program(context, srcExeLayer);
+		progExeLayer.build(devices);
+		kernelExeLayer = cl::Kernel(progExeLayer, "execute");
+	} catch (cl::Error err) {
+		std::cerr << err.what() << '\n' << progExeLayer.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+	}
 
 	//init activation layer
 	/*
@@ -90,19 +94,22 @@ void ml::Task::executeLayer (size_t layer) {
 	kernelExeLayer.setArg(2, weights[layer]);
 	kernelExeLayer.setArg(3, (*architecture)[layer]);
 	kernelExeLayer.setArg(4, (*architecture)[layer + 1]);
-	kernelExeLayer.setArg(5, population);
+	kernelExeLayer.setArg(5, samples);
 	kernelExeLayer.setArg(6, inBlock);
 	kernelExeLayer.setArg(7, outBlock);
 
 	commandQueue.enqueueNDRangeKernel(kernelExeLayer, cl::NullRange, cl::NDRange(population, samples, sizeIn * sizeOut / inBlock / outBlock));
-	commandQueue.finish();
+
+
 
 
 	//debug
+	commandQueue.finish();
+
+
 	float * arr = new float[100500];
 	arr[0] = -1;
 	commandQueue.enqueueReadBuffer(neurons[layer + 1], CL_TRUE, 0, 512 * sizeof(float), arr);
 	commandQueue.finish();
-	std::cout << arr[0];
 	//debug
 }
