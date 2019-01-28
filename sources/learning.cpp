@@ -19,11 +19,9 @@ ml::Learning::Learning (const std::vector <size_t> & _arcitecture, size_t _count
 	cl::Platform::get(&platforms);
 	std::vector <cl::Device> devices;
 	for (auto & platform : platforms) {
-
 		std::vector <cl::Device> curDevices;
 		platform.getDevices(CL_DEVICE_TYPE_ALL, &curDevices);
 		std::copy(std::begin(curDevices), std::end(curDevices), std::back_inserter(devices));
-
 	}
 
 	size_t personIndex = 0;
@@ -34,8 +32,9 @@ ml::Learning::Learning (const std::vector <size_t> & _arcitecture, size_t _count
 		if (endOfGroup > _countOfNetworks) {
 			endOfGroup = _countOfNetworks;
 		}
-		tasks.emplace_back(device, personIndex, endOfGroup, & populationTable, & samplesTable);
+		tasks.emplace_back(device, personIndex, endOfGroup, &populationTable, &samplesTable);
 		personIndex = endOfGroup;
+		std::cout << device.getInfo<CL_DEVICE_NAME>() << std::endl;
 		break; // for debug
 	}
 }

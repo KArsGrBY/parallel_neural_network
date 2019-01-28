@@ -83,8 +83,8 @@ ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::P
 	 */
 }
 
-#define inBlock		1
-#define outBlock	1
+#define inBlock		10
+#define outBlock	10
 
 void ml::Task::executeLayer (size_t layer) {
 	size_t sizeIn = (*architecture)[layer];
@@ -107,9 +107,9 @@ void ml::Task::executeLayer (size_t layer) {
 	commandQueue.finish();
 
 
-	float * arr = new float[100500];
-	arr[0] = -1;
-	commandQueue.enqueueReadBuffer(neurons[layer + 1], CL_TRUE, 0, 512 * sizeof(float), arr);
-	commandQueue.finish();
+//	float * arr = new float[100500];
+//	arr[0] = -1;
+//	commandQueue.enqueueReadBuffer(neurons[layer + 1], CL_TRUE, 0, 512 * sizeof(float), arr);
+//	commandQueue.finish();
 	//debug
 }

@@ -1,89 +1,53 @@
-#pragma comment( lib, "opencl.lib" )
-#define __CL_ENABLE_EXCEPTIONS
 #include "CL/cl.hpp"
 #include "learning.hpp"
 #include "bits/stdc++.h"
+
 using namespace std;
 
-void test () {
+class Timer {
+private:
+	// Псевдонимы типов используются для удобного доступа к вложенным типам
+	using clock_t = std::chrono::high_resolution_clock;
+	using second_t = std::chrono::duration <double, std::ratio <1> >;
 
-	std::vector <cl::Device> devices;
+	std::chrono::time_point <clock_t> m_beg;
 
-	std::vector <cl::Platform> platforms;
-	cl::Platform::get(&platforms);
-	for (auto platform : platforms) {
-
-		std::vector <cl::Device> devs;
-		platform.getDevices(CL_DEVICE_TYPE_ALL, &devs);
-		std::copy(devs.begin(), devs.end(), std::back_inserter(devices));
+public:
+	Timer () : m_beg(clock_t::now()) {
 	}
 
-	cl::Device device = devices.front();
-	cl::Context context;
-	cl::Buffer bufArr1, bufArr2, bufArr3;
-	cl::CommandQueue commandQueue;
-	cl::Program::Sources source;
-	cl::Program program;
-	cl::Kernel kernel;
-
-	try {
-		devices = {device};
-		context = cl::Context(devices);
-
-		cl::Buffer bufArr1, bufArr2;
-
-		{
-			std::vector <float> buf = {1, 2, 3, 4, 5, 6, 7};
-
-			bufArr1 = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf.size() * sizeof(float),
-									  buf.data());
-			buf = {1, 2, 3, 4};
-			bufArr2 = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf.size() * sizeof(float),
-									  buf.data());
-		}
-
-
-		commandQueue = cl::CommandQueue(context, device);
-
-		std::ifstream fin("../kernels/executive_layer.cl");
-		std::string sourceCode(std::istreambuf_iterator <char>(fin), (std::istreambuf_iterator <char>()));
-
-		source = cl::Program::Sources(1, std::make_pair(sourceCode.c_str(), sourceCode.size() + 1));
-		program = cl::Program(context, source);
-		program.build(devices);
-
-		kernel = cl::Kernel(program, "test");
-
-		kernel.setArg(0, bufArr1);
-		kernel.setArg(1, bufArr2);
-
-		commandQueue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(1024),
-										  device.getInfo <CL_DEVICE_MAX_WORK_GROUP_SIZE>());
-		commandQueue.finish();
-
-		float* arr = new float[100];
-		arr[0] = -1;
-		commandQueue.enqueueReadBuffer(bufArr1, CL_TRUE, 0, 8 * sizeof(float), arr);
-		commandQueue.finish();
-		std::cerr << arr[0] << std::endl;
-
+	void reset () {
+		m_beg = clock_t::now();
 	}
-	catch (cl::Error err) {
-		std::string buildlog = program.getBuildInfo <CL_PROGRAM_BUILD_LOG>(device);
-		std::cerr << buildlog << std::endl;
-		std::cerr << err.what() << std::endl;
+
+	double elapsed () const {
+		return std::chrono::duration_cast <second_t>(clock_t::now() - m_beg).count();
 	}
-}
+};
+
+const int SAMPLES = 100;
+const int ITER = 100;
+const int SIZE_IN = 900, SIZE_OUT = 30;
+
 
 int main (int argc, char ** argv) {
+	using vec = std::vector <float>;
+	using sample = std::pair <vec, vec>;
+	std::vector <sample> samples;
+	for (int samp = 0; samp < SAMPLES; samp++) {
+		samples.push_back(std::make_pair(vec(SIZE_IN, rand() * 0.001f), vec(SIZE_OUT, rand() * 0.001f)));
+	}
 
-//	test();
-//	return 0;
 
-	ml::Learning learning({2, 2, 1}, 128, {
-		{{0, 0}, {0}},
-		{{1, 1}, {0}},
-		{{1, 0}, {1}},
-		{{0, 1}, {1}}});
-	learning.iteration();
+	ml::Learning learning({SIZE_IN, 30, SIZE_OUT}, 32, samples);
+
+
+	std::cerr << "START\n";
+	Timer timer;
+	for (int iter = 0; iter < ITER; iter++) {
+		std::cerr << iter << std::endl;
+		learning.iteration();
+	}
+	std::cout << std::fixed << std::setprecision(5) << timer.elapsed() / ITER << std::endl;
+
 }
