@@ -1,21 +1,27 @@
 //#pragma OPENCL EXTENSION cl_amd_printf : enable
 
-__kernel void execute (__global float *inputs, __global float *outputs, __global const float *weights, const uint sizeIn, const uint sizeOut, const uint samples, const uint inputBlock, const uint outputBlock) {
-	uint numOfWeights = sizeIn * sizeOut;
+__kernel void execute (
+		__constant float *inputs,
+		__global float *outputs,
+		__constant const float *weights,
+		const uint sizeIn,
+		const uint sizeOut,
+		const uint samples) {
+
 	const uint personId = get_global_id(0);
 	const uint sampleId = get_global_id(1);
-	const uint blockId = get_global_id(2);
-	const uint inId = blockId / (sizeOut / outputBlock) * inputBlock;
-	const uint outId = blockId % (sizeOut / outputBlock) * outputBlock;
-	const uint inShift = (personId * samples + sampleId) * sizeIn + inId;
-	const uint outShift = (personId * samples + sampleId) * sizeOut + outId;
+	const uint outputId = get_global_id(2);
 
-	//NEED to write uploading inputs and outputs blocks for local memory !!!
-	for (uint weightIndex = numOfWeights * personId + inId * sizeOut + outId, localInId = 0; localInId < inputBlock; ++localInId, weightIndex += sizeOut) {
-		for (uint localOutId = 0, wId = weightIndex; localOutId < outputBlock; ++localOutId, ++wId) {
-			outputs[outShift + localOutId] += weights[weightIndex] * inputs[inShift + localInId];
-		}
+	const uint lastInputId = (personId * samples + sampleId + 1) * sizeIn;
+
+	float outputNeuron = 0;
+
+	for (uint inputId = lastInputId - sizeIn, weightId = sizeIn * sizeOut * personId + outputId;
+			inputId < lastInputId;
+			++inputId, weightId += sizeOut) {
+		outputNeuron += weights[weightId] * inputs[inputId];
 	}
 
+	outputs[(personId * samples + sampleId) * sizeOut + outputId] = outputNeuron;
 	return;
 }

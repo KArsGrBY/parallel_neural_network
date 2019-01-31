@@ -6,7 +6,6 @@ using namespace std;
 
 class Timer {
 private:
-	// Псевдонимы типов используются для удобного доступа к вложенным типам
 	using clock_t = std::chrono::high_resolution_clock;
 	using second_t = std::chrono::duration <double, std::ratio <1> >;
 
@@ -26,7 +25,7 @@ public:
 };
 
 const int SAMPLES = 100;
-const int ITER = 100;
+const int ITER = 20;
 const int SIZE_IN = 900, SIZE_OUT = 30;
 
 
@@ -37,10 +36,14 @@ int main (int argc, char ** argv) {
 	for (int samp = 0; samp < SAMPLES; samp++) {
 		samples.push_back(std::make_pair(vec(SIZE_IN, rand() * 0.001f), vec(SIZE_OUT, rand() * 0.001f)));
 	}
+	ml::Learning learning({SIZE_IN, 30, SIZE_OUT}, 128, samples);
 
-
-	ml::Learning learning({SIZE_IN, 30, SIZE_OUT}, 32, samples);
-
+	/*ml::Learning learning({2, 4, 1}, 128, {
+			{{1, 1}, {0}},
+			{{1, 0}, {1}},
+			{{0, 1}, {1}},
+			{{0, 0}, {0}}
+	});*/
 
 	std::cerr << "START\n";
 	Timer timer;
@@ -49,5 +52,4 @@ int main (int argc, char ** argv) {
 		learning.iteration();
 	}
 	std::cout << std::fixed << std::setprecision(5) << timer.elapsed() / ITER << std::endl;
-
 }

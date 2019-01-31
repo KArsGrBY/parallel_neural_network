@@ -5,6 +5,7 @@
 #include "populationtable.hpp"
 #include "task.hpp"
 #include "iostream"
+#include "iomanip"
 
 ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::PopulationTable * popTable,
 				ml::SamplesTable * sampTable) {
@@ -60,22 +61,22 @@ ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::P
 
 	commandQueue = cl::CommandQueue(context, device);
 
-	//init executive layer
-
 	try {
+		//init executive layer
 		progExeLayer = cl::Program(context, srcExeLayer);
 		progExeLayer.build(devices);
 		kernelExeLayer = cl::Kernel(progExeLayer, "execute");
+
+
+		//init activation layer
+//		progActLayer = cl::Program(context, srcActLayer);
+//		progActLayer.build(devices);
+//		kernelActLayer = cl::Kernel(progActLayer, "activate");
 	} catch (cl::Error err) {
 		std::cerr << err.what() << '\n' << progExeLayer.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
 	}
 
-	//init activation layer
 	/*
-	progActLayer = cl::Program(context, srcActLayer);
-	progActLayer.build(devices);
-	kernelActLayer = cl::Kernel(progActLayer, "activate");
-
 	//init update layer
 	progUpdate = cl::Program(context, srcUpdate);
 	progUpdate.build(devices);
@@ -83,33 +84,30 @@ ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::P
 	 */
 }
 
-#define inBlock		10
-#define outBlock	10
-
 void ml::Task::executeLayer (size_t layer) {
 	size_t sizeIn = (*architecture)[layer];
 	size_t sizeOut = (*architecture)[layer + 1];
-	kernelExeLayer.setArg(0, neurons[layer]);
-	kernelExeLayer.setArg(1, neurons[layer + 1]);
-	kernelExeLayer.setArg(2, weights[layer]);
-	kernelExeLayer.setArg(3, (unsigned int) (*architecture)[layer]);
-	kernelExeLayer.setArg(4, (unsigned int) (*architecture)[layer + 1]);
-	kernelExeLayer.setArg(5, (unsigned int) samples);
-	kernelExeLayer.setArg(6, inBlock);
-	kernelExeLayer.setArg(7, outBlock);
 
-	commandQueue.enqueueNDRangeKernel(kernelExeLayer, cl::NullRange, cl::NDRange(population, samples, sizeIn * sizeOut / inBlock / outBlock));
+	size_t args = 0;
+	kernelExeLayer.setArg(args++, neurons[layer]);
+	kernelExeLayer.setArg(args++, neurons[layer + 1]);
+	kernelExeLayer.setArg(args++, weights[layer]);
+	kernelExeLayer.setArg(args++, (unsigned int) (*architecture)[layer]);
+	kernelExeLayer.setArg(args++, (unsigned int) (*architecture)[layer + 1]);
+	kernelExeLayer.setArg(args++, (unsigned int) samples);
 
-
-
+	commandQueue.enqueueNDRangeKernel(kernelExeLayer, cl::NullRange, cl::NDRange(population, samples, sizeOut));
 
 	//debug
 	commandQueue.finish();
 
 
-//	float * arr = new float[100500];
-//	arr[0] = -1;
-//	commandQueue.enqueueReadBuffer(neurons[layer + 1], CL_TRUE, 0, 512 * sizeof(float), arr);
-//	commandQueue.finish();
+	/*float * arr = new float[100500];
+	commandQueue.enqueueReadBuffer(neurons[layer + 1], CL_TRUE, 0, 512 * sizeof(float), arr);
+	commandQueue.finish();
+
+	for (int i = 0; i < 100; i++) {
+		std::cout << std::fixed << std::setprecision(3) << arr[i] << std::endl;
+	}*/
 	//debug
 }
