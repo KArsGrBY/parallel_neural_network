@@ -19,8 +19,8 @@ namespace ml {
 			return codeExeLayer;
 		}
 
-		const std::string & getActLayerCode () {
-			return codeActLayer;
+		const std::string & getErrorCode () {
+			return codeError;
 		}
 
 		const std::string & getUpdateCode () {
@@ -29,7 +29,7 @@ namespace ml {
 
 	private:
 		std::string codeExeLayer;
-		std::string codeActLayer;
+		std::string codeError;
 		std::string codeUpdate;
 
 		SingletonKernel () {
@@ -42,8 +42,8 @@ namespace ml {
 			fin.close();
 
 			//upload activate layer kernel
-			fin = std::ifstream("../kernels/activate_layer.cl");
-			codeActLayer = std::string(std::istreambuf_iterator <char>(fin), (std::istreambuf_iterator <char>()));
+			fin = std::ifstream("../kernels/arror.cl");
+			codeError = std::string(std::istreambuf_iterator <char>(fin), (std::istreambuf_iterator <char>()));
 			fin.close();
 
 			//upload update kernel

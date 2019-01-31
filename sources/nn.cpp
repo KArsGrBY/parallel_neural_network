@@ -18,7 +18,6 @@ ml::Nn::Nn (const std::vector <size_t> & _architecture) {
 		for (size_t neuronInput = 0; neuronInput < input; ++neuronInput) {
 			for (size_t neuronOutput = 0; neuronOutput < output; ++neuronOutput) {
 				weights[layer][neuronInput * output + neuronOutput] = randomFromRange(-range, range);
-//				weights[layer][neuronInput * output + neuronOutput] = 1;
 			}
 		}
 	}

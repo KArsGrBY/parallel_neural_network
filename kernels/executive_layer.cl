@@ -1,9 +1,13 @@
 //#pragma OPENCL EXTENSION cl_amd_printf : enable
 
+float activation_function (float x) {
+	return 1.f / (1 + exp(-x));
+}
+
 __kernel void execute (
 		__constant float *inputs,
 		__global float *outputs,
-		__constant const float *weights,
+		__constant float *weights,
 		const uint sizeIn,
 		const uint sizeOut,
 		const uint samples) {
@@ -22,6 +26,6 @@ __kernel void execute (
 		outputNeuron += weights[weightId] * inputs[inputId];
 	}
 
-	outputs[(personId * samples + sampleId) * sizeOut + outputId] = outputNeuron;
+	outputs[(personId * samples + sampleId) * sizeOut + outputId] = activation_function(outputNeuron);
 	return;
 }

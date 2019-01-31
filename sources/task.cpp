@@ -22,9 +22,12 @@ ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::P
 	neurons = std::vector <cl::Buffer>(architecture.size());
 
 	//init kernel's source code
-	srcExeLayer = cl::Program::Sources(1, std::make_pair(SingletonKernel::getInstance().getExeLayerCode().data(), SingletonKernel::getInstance().getExeLayerCode().size() + 1));
-	srcActLayer = cl::Program::Sources(1, std::make_pair(SingletonKernel::getInstance().getActLayerCode().data(), SingletonKernel::getInstance().getActLayerCode().size() + 1));
-	srcUpdate = cl::Program::Sources(1, std::make_pair(SingletonKernel::getInstance().getUpdateCode().data(), SingletonKernel::getInstance().getUpdateCode().size() + 1));
+	srcExeLayer = cl::Program::Sources(1, std::make_pair(SingletonKernel::getInstance().getExeLayerCode().data(),
+														 SingletonKernel::getInstance().getExeLayerCode().size() + 1));
+	srcError = cl::Program::Sources(1, std::make_pair(SingletonKernel::getInstance().getErrorCode().data(),
+														 SingletonKernel::getInstance().getErrorCode().size() + 1));
+	srcUpdate = cl::Program::Sources(1, std::make_pair(SingletonKernel::getInstance().getUpdateCode().data(),
+													   SingletonKernel::getInstance().getUpdateCode().size() + 1));
 
 	//push output of samples into buffer
 	outputs = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
@@ -41,7 +44,8 @@ ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::P
 	//push layers into buffer
 	for (size_t layer = 1; layer < architecture.size(); ++layer) {
 		buf = std::vector <float>(samples * architecture[layer] * population);
-		neurons[layer] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf.size() * sizeof(float), buf.data());
+		neurons[layer] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, buf.size() * sizeof(float),
+									buf.data());
 	}
 
 	//push weights of nn's into buffer
@@ -69,11 +73,11 @@ ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::P
 
 
 		//init activation layer
-//		progActLayer = cl::Program(context, srcActLayer);
-//		progActLayer.build(devices);
-//		kernelActLayer = cl::Kernel(progActLayer, "activate");
+//		progError = cl::Program(context, srcError);
+//		progError.build(devices);
+//		kernelError = cl::Kernel(progError, "activate");
 	} catch (cl::Error err) {
-		std::cerr << err.what() << '\n' << progExeLayer.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+		std::cerr << err.what() << '\n' << progExeLayer.getBuildInfo <CL_PROGRAM_BUILD_LOG>(device);
 	}
 
 	/*
@@ -98,7 +102,6 @@ void ml::Task::executeLayer (size_t layer) {
 
 	commandQueue.enqueueNDRangeKernel(kernelExeLayer, cl::NullRange, cl::NDRange(population, samples, sizeOut));
 
-	//debug
 	commandQueue.finish();
 
 

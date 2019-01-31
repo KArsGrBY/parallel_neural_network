@@ -13,17 +13,17 @@ namespace ml {
 		friend class Learning;
 	private:
 		cl::Program::Sources srcExeLayer;
-		cl::Program::Sources srcActLayer;
+		cl::Program::Sources srcError;
 		cl::Program::Sources srcUpdate;
 
 		cl::Device device;
 		cl::Context context;
 		cl::CommandQueue commandQueue;
 		cl::Program progExeLayer;
-		cl::Program progActLayer;
+		cl::Program progError;
 		cl::Program progUpdate;
 		cl::Kernel kernelExeLayer;
-		cl::Kernel kernelActLayer;
+		cl::Kernel kernelError;
 		cl::Kernel kernelUpdate;
 
 		std::vector <cl::Buffer> neurons;

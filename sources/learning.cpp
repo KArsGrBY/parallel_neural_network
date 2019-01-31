@@ -11,11 +11,6 @@ ml::Learning::Learning (const std::vector <size_t> & _arcitecture, size_t _count
 		assert("Number layers in neural network must be at least 2");
 	}
 
-//	for (int i = 0; i < populationTable.weights[0].size(); i++) {
-//		std::cout << populationTable.weights[0][i] << '\n';
-//	}
-//	std::cout << std::endl << std::endl;
-
 	for (const auto & sample : _samples) {
 		samplesTable.addSample(sample.first, sample.second);
 	}
@@ -51,4 +46,5 @@ void ml::Learning::iteration () {
 		}
 		break; // for debug
 	}
+
 }
