@@ -7,8 +7,12 @@
 #include "iostream"
 #include "iomanip"
 
-ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::PopulationTable * popTable,
-				ml::SamplesTable * sampTable) {
+ml::Task::Task (cl::Device _device,
+				size_t _firstIndex,
+				size_t _lastIndex,
+				ml::PopulationTable * popTable,
+				ml::SamplesTable * sampTable,
+				std::vector <float> & _errors) {
 	architecture = popTable->architecture;
 
 	firstIndex = _firstIndex, lastIndex = _lastIndex;
@@ -18,6 +22,7 @@ ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::P
 	std::vector <cl::Device> devices = {device};
 
 	context = cl::Context(devices);
+
 	const auto & architecture = *popTable->architecture;
 	neurons = std::vector <cl::Buffer>(architecture.size());
 
@@ -25,7 +30,7 @@ ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::P
 	srcExeLayer = cl::Program::Sources(1, std::make_pair(SingletonKernel::getInstance().getExeLayerCode().data(),
 														 SingletonKernel::getInstance().getExeLayerCode().size() + 1));
 	srcError = cl::Program::Sources(1, std::make_pair(SingletonKernel::getInstance().getErrorCode().data(),
-														 SingletonKernel::getInstance().getErrorCode().size() + 1));
+													  SingletonKernel::getInstance().getErrorCode().size() + 1));
 	srcUpdate = cl::Program::Sources(1, std::make_pair(SingletonKernel::getInstance().getUpdateCode().data(),
 													   SingletonKernel::getInstance().getUpdateCode().size() + 1));
 
@@ -48,14 +53,30 @@ ml::Task::Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, ml::P
 									buf.data());
 	}
 
+	//set buffer for errors
+	errors = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+						population * samples, _errors.data() + _firstIndex * samples);
+
 	//push weights of nn's into buffer
 	weights = std::vector <cl::Buffer>(architecture.size() - 1);
+	bestWeights = std::vector <cl::Buffer>(architecture.size() - 1);
+	motions = std::vector <cl::Buffer>(architecture.size() - 1);
+
 	bestPerson = std::vector <cl::Buffer>(architecture.size() - 1);
 	for (size_t layer = 0; layer + 1 < architecture.size(); ++layer) {
 		size_t weightsNumber = architecture[layer] * architecture[layer + 1];
+
 		weights[layer] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
 									weightsNumber * population * sizeof(float),
 									popTable->weights[layer].data() + firstIndex * weightsNumber);
+
+		bestWeights[layer] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+										weightsNumber * population * sizeof(float),
+										popTable->bestWeights[layer].data() + firstIndex * weightsNumber);
+
+		motions[layer] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+									weightsNumber * population * sizeof(float),
+									popTable->motions[layer].data() + firstIndex * weightsNumber);
 
 		//push weights of best nn into buffer
 		bestPerson[layer] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, weightsNumber * sizeof(float),
@@ -101,16 +122,5 @@ void ml::Task::executeLayer (size_t layer) {
 	kernelExeLayer.setArg(args++, (unsigned int) samples);
 
 	commandQueue.enqueueNDRangeKernel(kernelExeLayer, cl::NullRange, cl::NDRange(population, samples, sizeOut));
-
 	commandQueue.finish();
-
-
-	/*float * arr = new float[100500];
-	commandQueue.enqueueReadBuffer(neurons[layer + 1], CL_TRUE, 0, 512 * sizeof(float), arr);
-	commandQueue.finish();
-
-	for (int i = 0; i < 100; i++) {
-		std::cout << std::fixed << std::setprecision(3) << arr[i] << std::endl;
-	}*/
-	//debug
 }

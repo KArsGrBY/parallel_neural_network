@@ -6,7 +6,9 @@ ml::Learning::Learning (const std::vector <size_t> & _arcitecture, size_t _count
 		: architecture(_arcitecture),
 		  populationTable(PopulationTable(&architecture, std::vector <Nn>(_countOfNetworks, Nn(architecture)))),
 		  samplesTable(SamplesTable(architecture.front(), architecture.back())),
-		  tasks(std::vector <Task>()) {
+		  tasks(std::vector <Task>()),
+		  errors(std::vector <float>(_samples.size() * _countOfNetworks)) {
+
 	if (architecture.size() < 2) {
 		assert("Number layers in neural network must be at least 2");
 	}
@@ -32,7 +34,7 @@ ml::Learning::Learning (const std::vector <size_t> & _arcitecture, size_t _count
 		if (endOfGroup > _countOfNetworks) {
 			endOfGroup = _countOfNetworks;
 		}
-		tasks.emplace_back(device, personIndex, endOfGroup, &populationTable, &samplesTable);
+		tasks.emplace_back(device, personIndex, endOfGroup, &populationTable, &samplesTable, errors);
 		personIndex = endOfGroup;
 		std::cout << device.getInfo<CL_DEVICE_NAME>() << std::endl;
 		break; // for debug
@@ -44,7 +46,6 @@ void ml::Learning::iteration () {
 		for (auto & task : tasks) {
 			task.executeLayer(layer);
 		}
-		break; // for debug
 	}
 
 }

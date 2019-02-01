@@ -8,6 +8,8 @@
 namespace ml {
 	struct PopulationTable {
 		std::vector <std::vector <float>> weights;
+		std::vector <std::vector <float>> bestWeights;
+		std::vector <std::vector <float>> motions;
 		size_t bestPersonIndex;
 		const std::vector <size_t> * architecture;
 		std::vector <Nn> population;

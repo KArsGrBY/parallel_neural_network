@@ -28,15 +28,18 @@ namespace ml {
 
 		std::vector <cl::Buffer> neurons;
 		std::vector <cl::Buffer> weights;
+		std::vector <cl::Buffer> bestWeights;
+		std::vector <cl::Buffer> motions;
 		std::vector <cl::Buffer> bestPerson;
+		cl::Buffer errors;
+		cl::Buffer outputs;
 
 		const std::vector <size_t> *architecture;
-		cl::Buffer outputs;
 		size_t population, samples;
 		size_t firstIndex, lastIndex;
 
 	public:
-		Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, PopulationTable * popTable, SamplesTable * sampTable);
+		Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, PopulationTable * popTable, SamplesTable * sampTable, std::vector <float> & _errors);
 
 		void executeLayer (size_t layer);
 	};

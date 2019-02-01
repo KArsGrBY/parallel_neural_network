@@ -25,7 +25,7 @@ public:
 };
 
 const int SAMPLES = 100;
-const int ITER = 20;
+const int ITER = 1;
 const int SIZE_IN = 900, SIZE_OUT = 30;
 
 
