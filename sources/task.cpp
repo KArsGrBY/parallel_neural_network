@@ -19,6 +19,9 @@ ml::Task::Task (cl::Device _device,
 	population = lastIndex - firstIndex;
 	samples = sampTable->size;
 	device = _device;
+
+	tempErrors = std::vector <float>(population * samples);
+
 	std::vector <cl::Device> devices = {device};
 
 	context = cl::Context(devices);
@@ -54,8 +57,12 @@ ml::Task::Task (cl::Device _device,
 	}
 
 	//set buffer for errors
+	finalErrors = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+							 population * sizeof(float), _errors.data() + _firstIndex);
 	errors = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
-						population * samples, _errors.data() + _firstIndex * samples);
+						tempErrors.size() * sizeof(float), tempErrors.data());
+	bestErrors = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+							population * sizeof(float), _errors.data() + _firstIndex);
 
 	//push weights of nn's into buffer
 	weights = std::vector <cl::Buffer>(architecture.size() - 1);
@@ -79,7 +86,8 @@ ml::Task::Task (cl::Device _device,
 									popTable->motions[layer].data() + firstIndex * weightsNumber);
 
 		//push weights of best nn into buffer
-		bestPerson[layer] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, weightsNumber * sizeof(float),
+		bestPerson[layer] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+									   weightsNumber * sizeof(float),
 									   popTable->weights[layer].data());
 	}
 
@@ -93,10 +101,21 @@ ml::Task::Task (cl::Device _device,
 		kernelExeLayer = cl::Kernel(progExeLayer, "execute");
 
 
-		//init activation layer
-//		progError = cl::Program(context, srcError);
-//		progError.build(devices);
-//		kernelError = cl::Kernel(progError, "activate");
+		//init error calculations
+		progError = cl::Program(context, srcError);
+		progError.build(devices);
+		kernelError = cl::Kernel(progError, "calculate_error");
+
+		//init final error calculations
+		progFinalError = cl::Program(context, srcError);
+		progFinalError.build(devices);
+		kernelFinalError = cl::Kernel(progFinalError, "calculate_final_error");
+
+		//init best error loader
+//		progBestError = cl::Program(context, srcError);
+//		progBestError.build(devices);
+//		kernelBestError = cl::Kernel(progBestError, "calculate_best_error");
+
 	} catch (cl::Error err) {
 		std::cerr << err.what() << '\n' << progExeLayer.getBuildInfo <CL_PROGRAM_BUILD_LOG>(device);
 	}
@@ -122,5 +141,53 @@ void ml::Task::executeLayer (size_t layer) {
 	kernelExeLayer.setArg(args++, (unsigned int) samples);
 
 	commandQueue.enqueueNDRangeKernel(kernelExeLayer, cl::NullRange, cl::NDRange(population, samples, sizeOut));
+
+	// for many defices need a separate method
 	commandQueue.finish();
+}
+
+void ml::Task::calculateError () {
+	size_t args = 0;
+	kernelError.setArg(args++, neurons.back());
+	kernelError.setArg(args++, outputs);
+	kernelError.setArg(args++, errors);
+	kernelError.setArg(args++, (unsigned int) architecture->back());
+	kernelError.setArg(args++, (unsigned int) samples);
+
+
+	commandQueue.enqueueNDRangeKernel(kernelError, cl::NullRange, cl::NDRange(population, samples));
+
+	// for many defices need a separate method
+	commandQueue.finish();
+}
+
+void ml::Task::calculateFinalError (std::vector <float> & error) {
+	size_t args = 0;
+	kernelFinalError.setArg(args++, errors);
+	kernelFinalError.setArg(args++, finalErrors);
+	kernelFinalError.setArg(args++, (unsigned int) samples);
+
+	commandQueue.enqueueNDRangeKernel(kernelFinalError, cl::NullRange, cl::NDRange(population));
+
+	// for many defices need a separate method
+	commandQueue.finish();
+}
+
+void ml::Task::updatePersonsBestState (size_t layer) {
+	size_t args = 0;
+	kernelBestError.setArg(args++, finalErrors);
+	kernelBestError.setArg(args++, bestErrors);
+	kernelBestError.setArg(args++, weights[layer]);
+	kernelBestError.setArg(args++, bestWeights[layer]);
+
+	kernelBestError.setArg(args++, (unsigned int) population);
+
+	commandQueue.enqueueNDRangeKernel(kernelBestError, cl::NullRange, cl::NDRange(population));
+
+	// for many defices need a separate method
+	commandQueue.finish();
+}
+
+void ml::Task::uploadBestErrors (float * err) {
+	commandQueue.enqueueReadBuffer(bestErrors, CL_TRUE, 0, population * sizeof(float), err);
 }

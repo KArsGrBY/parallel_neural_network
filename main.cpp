@@ -25,8 +25,8 @@ public:
 };
 
 const int SAMPLES = 100;
-const int ITER = 1;
-const int SIZE_IN = 900, SIZE_OUT = 30;
+const int ITER = 20;
+const int SIZE_IN = 1000, SIZE_OUT = 30;
 
 
 inline float randomFromRange (float x, float y) {
@@ -35,14 +35,22 @@ inline float randomFromRange (float x, float y) {
 	return dis(gen);
 }
 
+inline std::vector <float> vgen (size_t len) {
+	std::vector <float> v(len);
+	for (int i = 0; i < v.size(); i++) {
+		v[i] = randomFromRange(0, 1);
+	}
+	return v;
+}
+
 int main (int argc, char ** argv) {
 	using vec = std::vector <float>;
 	using sample = std::pair <vec, vec>;
 	std::vector <sample> samples;
 	for (int samp = 0; samp < SAMPLES; samp++) {
-		samples.push_back(std::make_pair(vec(SIZE_IN, randomFromRange(0, 1)), vec(SIZE_OUT, randomFromRange(0, 1))));
+		samples.push_back(std::make_pair(vgen(SIZE_IN), vgen(SIZE_OUT)));
 	}
-	ml::Learning learning({SIZE_IN, 30, SIZE_OUT}, 128, samples);
+	ml::Learning learning({SIZE_IN, 30, SIZE_OUT}, 256, samples);
 
 	/*ml::Learning learning({2, 4, 1}, 128, {
 			{{1, 1}, {0}},

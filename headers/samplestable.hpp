@@ -7,6 +7,7 @@
 namespace ml {
 	class SamplesTable {
 		friend class Task;
+		friend class Learning;
 	private:
 		std::vector <float> input;
 		std::vector <float> output;

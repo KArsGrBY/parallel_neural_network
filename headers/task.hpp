@@ -19,11 +19,17 @@ namespace ml {
 		cl::Device device;
 		cl::Context context;
 		cl::CommandQueue commandQueue;
+
 		cl::Program progExeLayer;
 		cl::Program progError;
+		cl::Program progFinalError;
+		cl::Program progBestError;
 		cl::Program progUpdate;
+
 		cl::Kernel kernelExeLayer;
 		cl::Kernel kernelError;
+		cl::Kernel kernelFinalError;
+		cl::Kernel kernelBestError;
 		cl::Kernel kernelUpdate;
 
 		std::vector <cl::Buffer> neurons;
@@ -32,8 +38,11 @@ namespace ml {
 		std::vector <cl::Buffer> motions;
 		std::vector <cl::Buffer> bestPerson;
 		cl::Buffer errors;
+		cl::Buffer finalErrors;
+		cl::Buffer bestErrors;
 		cl::Buffer outputs;
 
+		std::vector <float> tempErrors;
 		const std::vector <size_t> *architecture;
 		size_t population, samples;
 		size_t firstIndex, lastIndex;
@@ -42,6 +51,14 @@ namespace ml {
 		Task (cl::Device _device, size_t _firstIndex, size_t _lastIndex, PopulationTable * popTable, SamplesTable * sampTable, std::vector <float> & _errors);
 
 		void executeLayer (size_t layer);
+
+		void calculateError ();
+
+		void calculateFinalError (std::vector <float> & error);
+
+		void updatePersonsBestState (size_t layer);
+
+		void uploadBestErrors (float * err);
 	};
 }
 

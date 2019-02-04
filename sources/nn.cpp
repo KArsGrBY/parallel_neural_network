@@ -3,7 +3,7 @@
 
 inline float randomFromRange (float x, float y) {
 	static std::mt19937 gen(time(nullptr));
-	std::uniform_real_distribution dis(x, y);
+	static std::uniform_real_distribution dis(x, y);
 	return dis(gen);
 }
 
@@ -14,6 +14,8 @@ ml::Nn::Nn (const std::vector <size_t> & _architecture) {
 	weights = vecs((int) architecture.size() - 1);
 	bestWeights = vecs((int) architecture.size() - 1);
 	motions = vecs((int) architecture.size() - 1);
+
+	curError = bestError = architecture.back() * 100.f;
 
 	for (size_t layer = 0; layer + 1 < architecture.size(); ++layer) {
 		size_t input = architecture[layer], output = architecture[layer + 1];
@@ -27,7 +29,6 @@ ml::Nn::Nn (const std::vector <size_t> & _architecture) {
 			for (size_t neuronOutput = 0; neuronOutput < output; ++neuronOutput) {
 				weights[layer][neuronInput * output + neuronOutput] = randomFromRange(-range, range);
 				motions[layer][neuronInput * output + neuronOutput] = randomFromRange(-range / 10.f, range / 10.f);
-
 			}
 		}
 		std::copy(std::begin(weights[layer]), std::end(weights[layer]), std::back_inserter(bestWeights[layer]));

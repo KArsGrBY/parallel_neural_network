@@ -42,7 +42,7 @@ namespace ml {
 			fin.close();
 
 			//upload activate layer kernel
-			fin = std::ifstream("../kernels/arror.cl");
+			fin = std::ifstream("../kernels/error.cl");
 			codeError = std::string(std::istreambuf_iterator <char>(fin), (std::istreambuf_iterator <char>()));
 			fin.close();
 

@@ -9,14 +9,13 @@
 #include "vector"
 
 namespace ml {
-
 	class Learning {
 	private:
 		std::vector <size_t> architecture;
 		PopulationTable populationTable;
 		SamplesTable samplesTable;
 		std::vector <Task> tasks;
-		std::vector <float> errors;
+		std::vector <float> bestErrors, errors;
 
 	public:
 		Learning (const std::vector <size_t> & _arcitecture, size_t _countOfNetworks,
