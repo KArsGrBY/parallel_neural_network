@@ -45,11 +45,11 @@ __kernel void calculate_best_error (
 		__global float *bestWeights,
 		const uint size) {
 	const uint personId = get_global_id(0);
-	const uind lastId = (personId + 1) * size;
+	const uint lastId = (personId + 1) * size;
 
 
-	if (errors[personId] >= bestWeights[personId]) {
-		bestWeights[personId] = errors[personId];
+	if (errors[personId] <= bestErrors[personId]) {
+		bestErrors[personId] = errors[personId];
 		for (uint id = lastId - size; id < lastId; ++id) {
 			bestWeights[id] = weights[id];
 		}
@@ -57,3 +57,18 @@ __kernel void calculate_best_error (
 	return;
 }
 
+__kernel void copy_best_person (
+		__constant float * weights,
+		__global float * bestWeights,
+		const uint sizeIn,
+		const uint sizeOut,
+		const uint personId) {
+
+	const uint inputId = get_global_id(0);
+
+	const uint lastId = personId * sizeIn * sizeOut + (inputId + 1) * sizeOut;
+	for (uint id = lastId - sizeOut, bestId = inputId * sizeOut; id < lastId; ++id, ++bestId) {
+		bestWeights[bestId] = weights[id];
+	}
+	return;
+}

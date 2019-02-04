@@ -25,8 +25,8 @@ public:
 };
 
 const int SAMPLES = 100;
-const int ITER = 20;
-const int SIZE_IN = 1000, SIZE_OUT = 30;
+const int ITER = 1;
+const int SIZE_IN = 10, SIZE_OUT = 4;
 
 
 inline float randomFromRange (float x, float y) {

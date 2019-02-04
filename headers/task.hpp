@@ -24,12 +24,14 @@ namespace ml {
 		cl::Program progError;
 		cl::Program progFinalError;
 		cl::Program progBestError;
+		cl::Program progCopy;
 		cl::Program progUpdate;
 
 		cl::Kernel kernelExeLayer;
 		cl::Kernel kernelError;
 		cl::Kernel kernelFinalError;
 		cl::Kernel kernelBestError;
+		cl::Kernel kernelCopy;
 		cl::Kernel kernelUpdate;
 
 		std::vector <cl::Buffer> neurons;
@@ -58,7 +60,11 @@ namespace ml {
 
 		void updatePersonsBestState (size_t layer);
 
-		void uploadBestErrors (float * err);
+		void downloadBestErrors (float * err);
+
+		void downloadBestPerson (size_t layer, size_t personId, float * weights);
+
+		void uploadBestPerson (size_t layer, float * cpuWeights);
 	};
 }
 

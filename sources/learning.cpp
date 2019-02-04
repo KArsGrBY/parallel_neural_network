@@ -17,7 +17,7 @@ ml::Learning::Learning (const std::vector <size_t> & _arcitecture, size_t _count
 		  populationTable(PopulationTable(&architecture, generateNetworks(_countOfNetworks, _arcitecture))),
 		  samplesTable(SamplesTable(architecture.front(), architecture.back())),
 		  tasks(std::vector <Task>()),
-		  bestErrors(std::vector <float> ()),
+		  bestErrors(std::vector <float>()),
 		  errors(std::vector <float>()) {
 
 	if (architecture.size() < 2) {
@@ -84,7 +84,7 @@ void ml::Learning::iteration () {
 		task.calculateFinalError(errors);
 	}
 
-	/*for (size_t layer = 0; layer + 1 < architecture.size(); ++layer) {
+	for (size_t layer = 0; layer + 1 < architecture.size(); ++layer) {
 		for (auto & task : tasks) {
 			task.updatePersonsBestState(layer);
 		}
@@ -92,9 +92,25 @@ void ml::Learning::iteration () {
 
 	size_t counter = 0;
 	for (auto & task : tasks) {
-		task.uploadBestErrors(bestErrors.data() + counter);
+		task.downloadBestErrors(bestErrors.data() + counter);
 		counter += task.population;
 	}
 
-	size_t bestPersonId = std::max_element(std::begin(bestErrors), std::end(bestErrors)) - std::begin(bestErrors);*/
+	size_t taskWithBestPerson = 0;
+	size_t bestPersonId = std::min_element(std::begin(bestErrors), std::end(bestErrors)) - std::begin(bestErrors);
+	for (; tasks[taskWithBestPerson].population <= bestPersonId;
+		   bestPersonId -= tasks[taskWithBestPerson++].population);
+
+
+	std::vector <std::vector <float>> bestWeights((int) architecture.size() - 1);
+	for (size_t layer = 0; layer + 1 < architecture.size(); ++layer) {
+		bestWeights[layer] = std::vector <float> (architecture[layer] * architecture[layer + 1]);
+		tasks[taskWithBestPerson].downloadBestPerson(layer, bestPersonId, bestWeights[layer].data());
+	}
+
+	for (size_t layer = 0; layer + 1 < architecture.size(); ++layer) {
+		for (auto & task : tasks) {
+			task.uploadBestPerson(layer, bestWeights[layer].data());
+		}
+	}
 }

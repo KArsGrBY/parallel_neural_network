@@ -112,12 +112,17 @@ ml::Task::Task (cl::Device _device,
 		kernelFinalError = cl::Kernel(progFinalError, "calculate_final_error");
 
 		//init best error loader
-//		progBestError = cl::Program(context, srcError);
-//		progBestError.build(devices);
-//		kernelBestError = cl::Kernel(progBestError, "calculate_best_error");
+		progBestError = cl::Program(context, srcError);
+		progBestError.build(devices);
+		kernelBestError = cl::Kernel(progBestError, "calculate_best_error");
+
+		//init copier of best person
+		progCopy = cl::Program(context, srcError);
+		progCopy.build(devices);
+		kernelCopy = cl::Kernel(progCopy, "copy_best_person");
 
 	} catch (cl::Error err) {
-		std::cerr << err.what() << '\n' << progExeLayer.getBuildInfo <CL_PROGRAM_BUILD_LOG>(device);
+		std::cerr << err.what() << '\n' << progError.getBuildInfo <CL_PROGRAM_BUILD_LOG>(device);
 	}
 
 	/*
@@ -179,8 +184,7 @@ void ml::Task::updatePersonsBestState (size_t layer) {
 	kernelBestError.setArg(args++, bestErrors);
 	kernelBestError.setArg(args++, weights[layer]);
 	kernelBestError.setArg(args++, bestWeights[layer]);
-
-	kernelBestError.setArg(args++, (unsigned int) population);
+	kernelBestError.setArg(args++, (unsigned int) (*architecture)[layer] * (*architecture)[layer + 1]);
 
 	commandQueue.enqueueNDRangeKernel(kernelBestError, cl::NullRange, cl::NDRange(population));
 
@@ -188,6 +192,30 @@ void ml::Task::updatePersonsBestState (size_t layer) {
 	commandQueue.finish();
 }
 
-void ml::Task::uploadBestErrors (float * err) {
+void ml::Task::downloadBestErrors (float * err) {
 	commandQueue.enqueueReadBuffer(bestErrors, CL_TRUE, 0, population * sizeof(float), err);
+}
+
+void ml::Task::downloadBestPerson (size_t layer, size_t personId, float * cpuWeights) {
+	size_t args = 0;
+	kernelCopy.setArg(args++, weights[layer]);
+	kernelCopy.setArg(args++, bestWeights[layer]);
+	kernelCopy.setArg(args++, (unsigned int) (*architecture)[layer]);
+	kernelCopy.setArg(args++, (unsigned int) (*architecture)[layer + 1]);
+	kernelCopy.setArg(args++, (unsigned int) personId);
+
+	commandQueue.enqueueNDRangeKernel(kernelCopy, cl::NullRange, cl::NDRange((unsigned int) (*architecture)[layer]));
+
+	// for many defices need a separate method
+	commandQueue.finish();
+
+	commandQueue.enqueueReadBuffer(bestWeights[layer], CL_TRUE, 0,
+								   (*architecture)[layer] * (*architecture)[layer + 1] * sizeof(float), cpuWeights);
+}
+
+void ml::Task::uploadBestPerson (size_t layer, float * weights) {
+	bestPerson[layer] = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+								   (*architecture)[layer] * (*architecture)[layer + 1] * sizeof(float),
+								   weights);
+
 }
