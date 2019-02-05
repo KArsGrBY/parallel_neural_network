@@ -65,6 +65,8 @@ namespace ml {
 		void downloadBestPerson (size_t layer, size_t personId, float * weights);
 
 		void uploadBestPerson (size_t layer, float * cpuWeights);
+
+		void update (size_t layer, unsigned int seed);
 	};
 }
 

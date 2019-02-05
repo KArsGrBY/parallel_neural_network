@@ -24,15 +24,16 @@ public:
 	}
 };
 
-const int SAMPLES = 100;
-const int ITER = 1;
-const int SIZE_IN = 10, SIZE_OUT = 4;
+const int SAMPLES = 10;
+const int ITER = 3000;
+const int SIZE_IN = 40, SIZE_OUT = 30;
 
 
 inline float randomFromRange (float x, float y) {
 	static std::mt19937 gen(time(nullptr));
 	std::uniform_real_distribution dis(x, y);
-	return dis(gen);
+	return rand() % 2;
+//	return dis(gen);
 }
 
 inline std::vector <float> vgen (size_t len) {
@@ -62,7 +63,7 @@ int main (int argc, char ** argv) {
 	std::cerr << "START\n";
 	Timer timer;
 	for (int iter = 0; iter < ITER; iter++) {
-		std::cerr << iter << std::endl;
+//		std::cerr << iter << std::endl;
 		learning.iteration();
 	}
 	std::cout << std::fixed << std::setprecision(5) << timer.elapsed() / ITER << std::endl;

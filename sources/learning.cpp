@@ -1,6 +1,7 @@
 #include "learning.hpp"
 #include "algorithm"
 #include "cassert"
+#include "iomanip"
 
 std::vector <ml::Nn> generateNetworks (size_t number, const std::vector <size_t> & arcitecture) {
 	std::vector <ml::Nn> networks;
@@ -98,19 +99,29 @@ void ml::Learning::iteration () {
 
 	size_t taskWithBestPerson = 0;
 	size_t bestPersonId = std::min_element(std::begin(bestErrors), std::end(bestErrors)) - std::begin(bestErrors);
+
+	std::cerr << std::fixed << std::setprecision(20) << bestErrors[bestPersonId] << std::endl;
+
 	for (; tasks[taskWithBestPerson].population <= bestPersonId;
 		   bestPersonId -= tasks[taskWithBestPerson++].population);
 
 
 	std::vector <std::vector <float>> bestWeights((int) architecture.size() - 1);
 	for (size_t layer = 0; layer + 1 < architecture.size(); ++layer) {
-		bestWeights[layer] = std::vector <float> (architecture[layer] * architecture[layer + 1]);
+		bestWeights[layer] = std::vector <float>(architecture[layer] * architecture[layer + 1]);
 		tasks[taskWithBestPerson].downloadBestPerson(layer, bestPersonId, bestWeights[layer].data());
 	}
 
 	for (size_t layer = 0; layer + 1 < architecture.size(); ++layer) {
 		for (auto & task : tasks) {
 			task.uploadBestPerson(layer, bestWeights[layer].data());
+		}
+	}
+
+	unsigned int seed = std::time(0);
+	for (size_t layer = 0; layer + 1 < architecture.size(); ++layer) {
+		for (auto & task : tasks) {
+			task.update(layer, seed);
 		}
 	}
 }

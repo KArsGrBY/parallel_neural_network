@@ -24,11 +24,11 @@ ml::Nn::Nn (const std::vector <size_t> & _architecture) {
 		motions[layer].reserve(input * output);
 
 //		 		RANGE INITS HERE. 6.f for sigmoid function
-		float range = 6.f / input;
+		float range = 6.f;
 		for (size_t neuronInput = 0; neuronInput < input; ++neuronInput) {
 			for (size_t neuronOutput = 0; neuronOutput < output; ++neuronOutput) {
 				weights[layer][neuronInput * output + neuronOutput] = randomFromRange(-range, range);
-				motions[layer][neuronInput * output + neuronOutput] = randomFromRange(-range / 10.f, range / 10.f);
+				motions[layer][neuronInput * output + neuronOutput] = randomFromRange(-range / 4.f, range / 4.f);
 			}
 		}
 		std::copy(std::begin(weights[layer]), std::end(weights[layer]), std::back_inserter(bestWeights[layer]));

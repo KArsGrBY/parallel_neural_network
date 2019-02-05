@@ -121,16 +121,14 @@ ml::Task::Task (cl::Device _device,
 		progCopy.build(devices);
 		kernelCopy = cl::Kernel(progCopy, "copy_best_person");
 
-	} catch (cl::Error err) {
-		std::cerr << err.what() << '\n' << progError.getBuildInfo <CL_PROGRAM_BUILD_LOG>(device);
-	}
+		//init update layer
+		progUpdate = cl::Program(context, srcUpdate);
+		progUpdate.build(devices);
+		kernelUpdate = cl::Kernel(progUpdate, "update");
 
-	/*
-	//init update layer
-	progUpdate = cl::Program(context, srcUpdate);
-	progUpdate.build(devices);
-	kernelUpdate = cl::Kernel(progUpdate, "update");
-	 */
+	} catch (cl::Error err) {
+		std::cerr << err.what() << '\n' << progUpdate.getBuildInfo <CL_PROGRAM_BUILD_LOG>(device);
+	}
 }
 
 void ml::Task::executeLayer (size_t layer) {
@@ -218,4 +216,20 @@ void ml::Task::uploadBestPerson (size_t layer, float * weights) {
 								   (*architecture)[layer] * (*architecture)[layer + 1] * sizeof(float),
 								   weights);
 
+}
+
+void ml::Task::update (size_t layer, unsigned int seed) {
+	size_t args = 0;
+	kernelUpdate.setArg(args++, bestWeights[layer]);
+	kernelUpdate.setArg(args++, motions[layer]);
+	kernelUpdate.setArg(args++, bestPerson[layer]);
+	kernelUpdate.setArg(args++, weights[layer]);
+	kernelUpdate.setArg(args++, (unsigned int) (*architecture)[layer]);
+	kernelUpdate.setArg(args++, (unsigned int) (*architecture)[layer + 1]);
+	kernelUpdate.setArg(args++, (unsigned long long) seed);
+
+	commandQueue.enqueueNDRangeKernel(kernelUpdate, cl::NullRange, cl::NDRange(population, (*architecture)[layer]));
+
+	// for many defices need a separate method
+	commandQueue.finish();
 }
