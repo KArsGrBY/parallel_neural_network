@@ -25,11 +25,6 @@ ml::Learning::Learning (const std::vector <size_t> & _arcitecture, size_t _count
 		assert("Number layers in neural network must be at least 2");
 	}
 
-	//init neural networks
-	for (size_t person = 0; person < _countOfNetworks; ++person) {
-
-	}
-
 	for (const auto & sample : _samples) {
 		samplesTable.addSample(sample.first, sample.second);
 	}
@@ -50,7 +45,7 @@ ml::Learning::Learning (const std::vector <size_t> & _arcitecture, size_t _count
 	std::vector <cl::Device> devices;
 	for (auto & platform : platforms) {
 		std::vector <cl::Device> curDevices;
-		platform.getDevices(CL_DEVICE_TYPE_ALL, &curDevices);
+		platform.getDevices(CL_DEVICE_TYPE_GPU, &curDevices);
 		std::copy(std::begin(curDevices), std::end(curDevices), std::back_inserter(devices));
 	}
 
@@ -97,10 +92,15 @@ void ml::Learning::iteration () {
 		counter += task.population;
 	}
 
+//	std::cerr << "------------------\n";
+//	for (auto it : bestErrors) {
+//		std::cerr << std::fixed << std::setprecision(6) << it << std::endl;
+//	}
+
 	size_t taskWithBestPerson = 0;
 	size_t bestPersonId = std::min_element(std::begin(bestErrors), std::end(bestErrors)) - std::begin(bestErrors);
 
-	std::cerr << std::fixed << std::setprecision(20) << bestErrors[bestPersonId] << std::endl;
+	std::cerr << "BEST: " << std::fixed << std::setprecision(20) << bestErrors[bestPersonId] << std::endl;
 
 	for (; tasks[taskWithBestPerson].population <= bestPersonId;
 		   bestPersonId -= tasks[taskWithBestPerson++].population);

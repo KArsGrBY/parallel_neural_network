@@ -27,8 +27,9 @@ ml::Nn::Nn (const std::vector <size_t> & _architecture) {
 		float range = 6.f;
 		for (size_t neuronInput = 0; neuronInput < input; ++neuronInput) {
 			for (size_t neuronOutput = 0; neuronOutput < output; ++neuronOutput) {
-				weights[layer][neuronInput * output + neuronOutput] = randomFromRange(-range, range);
-				motions[layer][neuronInput * output + neuronOutput] = randomFromRange(-range / 4.f, range / 4.f);
+				weights[layer][neuronInput * output + neuronOutput] = randomFromRange(-range / 2.f, range / 2.f);
+				motions[layer][neuronInput * output + neuronOutput] = randomFromRange(-range / 8.f, range / 8.f);
+//				motions[layer][neuronInput * output + neuronOutput] = 0;
 			}
 		}
 		std::copy(std::begin(weights[layer]), std::end(weights[layer]), std::back_inserter(bestWeights[layer]));
